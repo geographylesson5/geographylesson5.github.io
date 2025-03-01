@@ -6,11 +6,33 @@ const directories = ["go", "category", "."];
 const oldText = "Unblocked Games G +";
 const newText = "Geography Lessons";
 
+// Additional replacements to ensure all variations are caught
+const additionalReplacements = [
+  { from: "Geography Lessons +", to: "Geography Lessons" },
+  { from: "Geography Lessons+", to: "Geography Lessons" },
+  { from: "Unblocked Games G+", to: "Geography Lessons" }
+];
+
 function processFile(filePath) {
   try {
     let content = fs.readFileSync(filePath, "utf8");
+    let changed = false;
+    
+    // Handle main replacement
     if (content.includes(oldText)) {
       content = content.replace(new RegExp(oldText, "g"), newText);
+      changed = true;
+    }
+    
+    // Handle additional variations
+    for (const replacement of additionalReplacements) {
+      if (content.includes(replacement.from)) {
+        content = content.replace(new RegExp(replacement.from, "g"), replacement.to);
+        changed = true;
+      }
+    }
+    
+    if (changed) {
       fs.writeFileSync(filePath, content, "utf8");
       console.log(`Updated: ${filePath}`);
       return true;
