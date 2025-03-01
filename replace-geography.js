@@ -10,7 +10,9 @@ const newText = "Geography Lessons";
 const additionalReplacements = [
   { from: "Geography Lessons +", to: "Geography Lessons" },
   { from: "Geography Lessons+", to: "Geography Lessons" },
-  { from: "Unblocked Games G+", to: "Geography Lessons" }
+  { from: "Unblocked Games G+", to: "Geography Lessons" },
+  { from: "<strong>Geography Lessons+</strong>", to: "<strong>Geography Lessons</strong>" },
+  { from: "<h1 class=\"single-title\">Geography Lessons+</h1>", to: "<h1 class=\"single-title\">Geography Lessons</h1>" }
 ];
 
 function processFile(filePath) {
@@ -27,10 +29,25 @@ function processFile(filePath) {
     // Handle additional variations
     for (const replacement of additionalReplacements) {
       if (content.includes(replacement.from)) {
-        content = content.replace(new RegExp(replacement.from, "g"), replacement.to);
+        content = content.replace(new RegExp(replacement.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g"), replacement.to);
         changed = true;
       }
     }
+    
+    // Fix title tags
+    if (content.includes("<title>")) {
+      // Replace any title containing Geography Lessons+ or Unblocked Games G+
+      const titleRegex = /<title>(.*?)(Geography Lessons\+|Unblocked Games G\+)(.*?)<\/title>/g;
+      const newContent = content.replace(titleRegex, "<title>$1Geography Lessons$3</title>");
+      
+      if (newContent !== content) {
+        content = newContent;
+        changed = true;
+      }
+    }
+    
+    // Replace in footer and other places
+    content = content.replace(/Geography Lessons\+/g, "Geography Lessons");
     
     if (changed) {
       fs.writeFileSync(filePath, content, "utf8");
